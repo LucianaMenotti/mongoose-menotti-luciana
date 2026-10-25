@@ -4,16 +4,17 @@ import { startDB } from "./src/config/database.js";
 import { agenciaRoutes } from "./src/routes/agencia.routes.js";
 import { gatoRoutes } from "./src/routes/gato.routes.js";
 import { collarRoutes } from "./src/routes/collar.routes.js";
+import { citaRoutes } from "./src/routes/cita.routes.js";
+
 const app = express();
 const PORT = process.env.PORT || 3003;
 
 app.use(express.json());
 
 app.use("/api", agenciaRoutes);
-
 app.use("/api", gatoRoutes);
-
 app.use("/api", collarRoutes);
+app.use("/api", citaRoutes);
 
 app.listen(PORT, async () => {
   await startDB();
