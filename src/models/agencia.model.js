@@ -18,8 +18,8 @@ const agenciaSchema = new Schema(
         },
     },
     {
-        timestamps: true,
         versionKey: false,
+        //Versionkey sirve para que no se cree el campo __v en la base de datos
     },
 );
 
