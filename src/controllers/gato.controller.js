@@ -1,5 +1,6 @@
 import { matchedData } from "express-validator";
 import { GatoModel } from "../models/gato.model.js";
+import { CollarModel } from "../models/collar.model.js";
 
 export const createGato = async (req, res) => {
   try {
@@ -48,10 +49,13 @@ export const getGatoById = async (req, res) => {
   try {
     const { id } = matchedData(req);
 
-    const gato = await GatoModel.findOne({
-      _id: id,
-      activo: true,
-    }).populate("agencia", "nombre lema");
+    const gato = await GatoModel.findOne({ _id: id, activo: true })
+      .populate("agencia", "nombre lema")
+      .populate({
+        path: "collar",
+        match: { activo: true },
+        select: "color frase",
+      });
 
     if (!gato) {
       return res.status(404).json({
@@ -116,8 +120,10 @@ export const deleteGato = async (req, res) => {
       });
     }
 
+    await CollarModel.updateMany({ gato: id, activo: true }, { activo: false });
+
     return res.status(200).json({
-      msg: "Gato eliminado correctamente",
+      msg: "Gato eliminado correctamente, junto con su collar",
     });
   } catch (error) {
     console.log(error);

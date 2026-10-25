@@ -1,5 +1,7 @@
 import { matchedData } from "express-validator";
 import { AgenciaModel } from "../models/agencia.model.js";
+import { GatoModel } from "../models/gato.model.js";
+import { CollarModel } from "../models/collar.model.js";
 
 export const createAgencia = async (req, res) => {
   try {
@@ -42,6 +44,10 @@ export const getAgenciaById = async (req, res) => {
     const agencia = await AgenciaModel.findOne({
       _id: id,
       activo: true,
+    }).populate({
+      path: "gatos",
+      match: { activo: true },
+      select: "nombre edad raza",
     });
 
     if (!agencia) {
@@ -61,7 +67,6 @@ export const getAgenciaById = async (req, res) => {
     });
   }
 };
-
 export const updateAgencia = async (req, res) => {
   try {
     const { id } = matchedData(req, { locations: ["params"] });
@@ -107,8 +112,22 @@ export const deleteAgencia = async (req, res) => {
       });
     }
 
+    const gatos = await GatoModel.find({ agencia: id, activo: true });
+    const idsGatos = gatos.map((gato) => gato._id);
+
+    await GatoModel.updateMany(
+      { agencia: id, activo: true },
+      { activo: false },
+    );
+
+    await CollarModel.updateMany(
+      { gato: { $in: idsGatos }, activo: true },
+      { activo: false },
+    );
+
     return res.status(200).json({
-      msg: "Agencia eliminada correctamente",
+      msg: "Agencia eliminada correctamente, junto con sus gatos y sus collares",
+      gatosEliminados: gatos.length,
     });
   } catch (error) {
     console.log(error);

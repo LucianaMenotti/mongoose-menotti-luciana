@@ -43,7 +43,17 @@ const gatoSchema = new Schema(
   {
     timestamps: true,
     versionKey: false,
+    id: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
+
+gatoSchema.virtual("collar", {
+  ref: "Collar",
+  localField: "_id",
+  foreignField: "gato",
+  justOne: true,
+});
 
 export const GatoModel = model("Gato", gatoSchema);
